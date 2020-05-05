@@ -23,7 +23,7 @@
     "type": "project",
     "require": {
         "php": "^7.2.5",
-        "illuminate/support": "^7.*",
+        "illuminate/support": "~7.0",
         "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
