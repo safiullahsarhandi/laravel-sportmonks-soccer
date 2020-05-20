@@ -80,7 +80,7 @@ class SoccerAPIClient {
             return $response;
         }
 
-        if($hasData && $this->withoutData)
+        if($this->withoutData)
         {
             return $body->data;
         }
