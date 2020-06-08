@@ -4,7 +4,7 @@ namespace Sportmonks\SoccerAPI;
 
 use GuzzleHttp\Client;
 use Sportmonks\SoccerAPI\Exceptions\ApiRequestException;
-
+use Illuminate\Support\Facades\Http;
 class SoccerAPIClient {
 
     /* @var $client Client */
@@ -18,14 +18,15 @@ class SoccerAPIClient {
     protected $perPage = 50;
     protected $page = 1;
     protected $timezone;
+    protected $options = []; 
     
     public function __construct()
     {
-        $options = [
+        $this->options = [
             'base_uri'  => 'https://soccer.sportmonks.com/api/v2.0/',
             'verify'    => app('env') === 'testing' ? false : true,
         ];
-        $this->client = new Client($options);
+        $this->client = new Client($this->options);
 
         $this->apiToken = config('soccerapi.api_token');
         if(empty($this->apiToken))
@@ -61,12 +62,21 @@ class SoccerAPIClient {
                 $query[$key] = $value;
             }
             // $params = http_build_query($this->params);
-        }
-        $response = $this->client->get($url, ['query' => $query]);
+        }   
+        $response = Http::withHeaders([
+                'content-type'      => 'application/json',
+                'X-Requested-With'  => 'XmlHttpRequest'
+            ])->withOptions($this->options)->get($url,$query);
+        /*$response = $this->client->request('GET',$url, ['query' => $query],[
+            'headers' => [
+                'content-type'      => 'application/json',
+                'X-Requested-With'  => 'XmlHttpRequest'
+            ],
+        ]);*/
 
-        $body = json_decode($response->getBody()->getContents());
+        $body = json_decode($response->body());
 
-        if(property_exists($body, 'error'))
+        if($response->failed())
         {
             if(is_object($body->error))
             {
